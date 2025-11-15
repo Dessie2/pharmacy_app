@@ -15,7 +15,7 @@ class AppWidget {
         elevation: 3.0,
           borderRadius: BorderRadius.circular(30),
             child: Container(
-              
+
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               height: 50,
               decoration: BoxDecoration(
@@ -29,5 +29,8 @@ class AppWidget {
           ),
        ),
     );
+  }
+  static TextStyle whiteTextStyle (double size){
+   return TextStyle(color: Colors.white, fontSize: size,fontWeight: FontWeight.bold,);
   }
 }
