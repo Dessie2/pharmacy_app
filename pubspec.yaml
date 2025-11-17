@@ -12,6 +12,10 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
 
+  # Firebase
+  firebase_core: ^2.31.0
+  firebase_auth: ^4.19.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -28,9 +32,6 @@ flutter:
       fonts:
         - asset: fonts/Raleway-Regular.ttf
           weight: 400
-          
-    - family: fonts/Raleway-Italic
-      fonts:
         - asset: fonts/Raleway-Italic.ttf
           style: italic
 

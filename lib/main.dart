@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 import 'package:pharmacy_app/pages/home.dart';
 import 'package:pharmacy_app/pages/detail_page.dart';
 import 'package:pharmacy_app/pages/login_page.dart';
 import 'package:pharmacy_app/pages/signup_page.dart';
 import 'package:pharmacy_app/pages/welcome_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializa Firebase con las opciones generadas por FlutterFire
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MyApp());
 }
 
