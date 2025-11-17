@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pharmacy_app/widgets/support_widget.dart';
+import 'package:pharmacy_app/pages/detail_page.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -14,172 +14,149 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 185, 183, 232),
+      backgroundColor: const Color(0xFFF4F6FA), // Fondo premium
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              // FOTO PERFIL
-              ClipRRect(
-                borderRadius: BorderRadius.circular(50.0),
-                child: Image.asset(
-                  "images/perfil.png",
-                  height: 60,
-                  width: 60,
-                  fit: BoxFit.cover,
-                ),
+              /// ---------------------------------------
+              ///        CABECERA 
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(50.0),
+                    child: Image.asset(
+                      "images/perfil.png",
+                      height: 55,
+                      width: 55,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Icon(
+                    Icons.notifications_none_rounded,
+                    size: 32,
+                    color: Color(0xFF415696),
+                  )
+                ],
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 28),
 
-              // TITULOS
-              Text("Your Trusted", style: AppWidget.headlineTextStyle(26.0)),
-              Text("Online Pharmacy", style: AppWidget.lightTextStyle(28.0)),
+              /// TITULOS PREMIUM
+              Text("Your Trusted",
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF415696),
+                  )),
+              Text("Online Pharmacy",
+                  style: TextStyle(
+                    fontSize: 26,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
+                  )),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 28),
 
-              // BARRA DE BÚSQUEDA
+              /// ---------------------------------------
+              ///        SEARCH BAR
+              /// ---------------------------------------
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: Colors.white, width: 1.5),
-                  color: const Color.fromARGB(255, 233, 230, 247),
+                  borderRadius: BorderRadius.circular(28),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 12,
+                      offset: Offset(0, 4),
+                    )
+                  ],
                 ),
                 child: TextField(
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText: "Search Medicine...",
-                    hintStyle: AppWidget.lightTextStyle(18.0).copyWith(
-                      color: const Color.fromARGB(255, 140, 137, 183),
+                    hintText: "Search medicine...",
+                    hintStyle: TextStyle(
+                      color: Colors.black38,
+                      fontSize: 16,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    suffixIcon: Container(
-                      margin: const EdgeInsets.only(top: 3, bottom: 3, right: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: const Icon(Icons.search, color: Colors.white, size: 24),
-                    ),
+                    prefixIcon: Icon(Icons.search_rounded,
+                        size: 28, color: Color(0xFF415696)),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 14),
                   ),
-                  style: const TextStyle(fontSize: 18),
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
 
-              // CATEGORÍAS
-              Container(
+              /// ---------------------------------------
+              ///       CATEGORÍAS PREMIUM
+              /// ---------------------------------------
+              SizedBox(
                 height: 50,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
-                    allmedicine
-                        ? AppWidget.selectCategory("All Medicines")
-                        : GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                allmedicine = true;
-                                suppliment = false;
-                                vitamins = false;
-                                herbal = false;
-                              });
-                            },
-                            child: Container(
-                              height: 50,
-                              child: Center(
-                                child: Text("All Medicine", style: AppWidget.lightTextStyle(20.0)),
-                              ),
-                            ),
-                          ),
-                    SizedBox(width: 30),
-
-                    suppliment
-                        ? AppWidget.selectCategory("Suppliment")
-                        : GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                allmedicine = false;
-                                suppliment = true;
-                                vitamins = false;
-                                herbal = false;
-                              });
-                            },
-                            child: Container(
-                              height: 50,
-                              child: Center(
-                                child: Text("Suppliment", style: AppWidget.lightTextStyle(20.0)),
-                              ),
-                            ),
-                          ),
-                    SizedBox(width: 30),
-
-                    vitamins
-                        ? AppWidget.selectCategory("Vitamins")
-                        : GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                allmedicine = false;
-                                suppliment = false;
-                                vitamins = true;
-                                herbal = false;
-                              });
-                            },
-                            child: Container(
-                              height: 50,
-                              child: Center(
-                                child: Text("Vitamins", style: AppWidget.lightTextStyle(20.0)),
-                              ),
-                            ),
-                          ),
-                    SizedBox(width: 30),
-
-                    herbal
-                        ? AppWidget.selectCategory("Herbal")
-                        : GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                allmedicine = false;
-                                suppliment = false;
-                                vitamins = false;
-                                herbal = true;
-                              });
-                            },
-                            child: Container(
-                              height: 50,
-                              child: Center(
-                                child: Text("Herbal", style: AppWidget.lightTextStyle(20.0)),
-                              ),
-                            ),
-                          ),
+                    premiumCategory("All", allmedicine, () {
+                      setState(() {
+                        allmedicine = true;
+                        suppliment = false;
+                        vitamins = false;
+                        herbal = false;
+                      });
+                    }),
+                    SizedBox(width: 15),
+                    premiumCategory("Supplements", suppliment, () {
+                      setState(() {
+                        allmedicine = false;
+                        suppliment = true;
+                        vitamins = false;
+                        herbal = false;
+                      });
+                    }),
+                    SizedBox(width: 15),
+                    premiumCategory("Vitamins", vitamins, () {
+                      setState(() {
+                        allmedicine = false;
+                        suppliment = false;
+                        vitamins = true;
+                        herbal = false;
+                      });
+                    }),
+                    SizedBox(width: 15),
+                    premiumCategory("Herbal", herbal, () {
+                      setState(() {
+                        allmedicine = false;
+                        suppliment = false;
+                        vitamins = false;
+                        herbal = true;
+                      });
+                    }),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
 
-              // TODO el contenido largo → SCROLL
+              /// ---------------------------------------
+              ///        LISTA DE MEDICINAS (CARDS)
+              /// ---------------------------------------
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-
-                      // TARJETA 1
                       buildMedicineCard(context),
-
-                      SizedBox(height: 20),
-
-                      // TARJETA 2
+                      const SizedBox(height: 25),
                       buildMedicineCard(context),
-
                     ],
                   ),
                 ),
               ),
-
             ],
           ),
         ),
@@ -187,66 +164,119 @@ class _HomeState extends State<Home> {
     );
   }
 
-  // TARJETA REUTILIZABLE
-  Widget buildMedicineCard(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(top: 30),
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color.fromARGB(255, 186, 179, 166),
-            Color.fromARGB(255, 221, 215, 205),
-            Color.fromARGB(255, 165, 156, 143),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Container(
+  /// -------------------------------------------------
+  ///       CATEGORÍA PREMIUM 
+  /// -------------------------------------------------
+  Widget premiumCategory(String title, bool active, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
         decoration: BoxDecoration(
-          color: Color(0xffc8c1b5),
-          borderRadius: BorderRadius.circular(30),
+          color: active ? Color(0xFF415696) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Color(0xFF415696),
+            width: 1.4,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: active ? 10 : 5,
+            )
+          ],
         ),
-        child: Stack(
+        child: Text(
+          title,
+          style: TextStyle(
+            color: active ? Colors.white : Color(0xFF415696),
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// -------------------------------------------------
+  ///         TARJETA DE MEDICINA
+  /// -------------------------------------------------
+  Widget buildMedicineCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const DetailPage()),
+        );
+      },
+      child: Container(
+        height: 270,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 12,
+              offset: Offset(0, 6),
+            )
+          ],
+        ),
+        child: Row(
           children: [
-            Center(
-              child: Image.asset(
-                "images/medicine.png",
-                height: 300,
-                fit: BoxFit.cover,
+            /// Imagen del medicamento
+            Expanded(
+              flex: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Image.asset(
+                  "images/medicine.png",
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-            Container(
-              height: 300,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.all(20),
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      color: Color.fromARGB(253, 200, 193, 181),
-                      border: Border.all(color: Colors.white, width: 1.5),
-                      borderRadius: BorderRadius.circular(30),
+
+            /// Información
+            Expanded(
+              flex: 5,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Unique Medicine",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF415696),
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("Unique Medicine", style: AppWidget.whiteTextStyle(20.0)),
-                            Text("\$100.00", style: AppWidget.whiteTextStyle(20.0)),
-                          ],
-                        ),
-                        Text("Oxmas", style: AppWidget.whiteTextStyle(20.0)),
-                      ],
+                    SizedBox(height: 6),
+                    Text(
+                      "Oxmas – Premium Healing Formula",
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
-                ],
+                    Spacer(),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      "\$100.00",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF415696),
+                      ),
+                    ),
+                  )
+
+                  ],
+                ),
               ),
             ),
           ],
