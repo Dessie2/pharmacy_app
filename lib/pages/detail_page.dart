@@ -63,10 +63,22 @@ class _DetailPageState extends State<DetailPage> {
                  ],
                 ),
                 Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: const Color.fromARGB(159, 255, 255, 255)),
+                  margin: EdgeInsets.only(top: MediaQuery.of(context).size.height/4),
+                  width: MediaQuery.of(context).size.width,
                     child: Row(children: [
-                        Text("Total Price:", style: AppWidget.headlineTextStyle(16),),
-                    ],
-                    ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Total Price:", style: AppWidget.lightTextStyle(18),),
+                            Text(" \$ 34.99", style: AppWidget.headlineTextStyle(20),),
+                         ],
+                        ),
+                        Container(
+                          decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(30)),
+                        )
+                      ],),
                 )
             ],
             ),
