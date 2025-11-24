@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pharmacy_app/pages/detail_page.dart';
+import 'package:pharmacy_app/pages/welcome_page.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -11,152 +14,184 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   bool allmedicine = true, suppliment = false, vitamins = false, herbal = false;
 
+  Stream<QuerySnapshot>? productStream;
+
+  getProducts(String category) async {
+    productStream = FirebaseFirestore.instance
+        .collection("products")
+        .where("category", isEqualTo: category)
+        .snapshots();
+
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getProducts("Medicine");
+  }
+
+  Widget allProducts() {
+    if (productStream == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return StreamBuilder(
+      stream: productStream,
+      builder: (context, AsyncSnapshot snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data.docs.length == 0) {
+          return const Center(
+            child: Text(
+              "No products found",
+              style: TextStyle(fontSize: 18, color: Colors.black54),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: EdgeInsets.zero,
+          itemCount: snapshot.data.docs.length,
+          itemBuilder: (context, index) {
+            var ds = snapshot.data.docs[index];
+            return buildMedicineCard(
+              context,
+              ds["name"],
+              ds["description"],
+              ds["company"],
+              ds["price"].toString(),
+              ds["category"],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA), // Fondo premium
+      backgroundColor: const Color(0xFFF4F6FA),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 10.0),
+          padding: const EdgeInsets.symmetric(horizontal: 22.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// ---------------------------------------
-              ///        CABECERA 
+              /// 🔹 BARRA SUPERIOR SIN CAMPANA
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(50.0),
-                    child: Image.asset(
-                      "images/perfil.png",
-                      height: 55,
-                      width: 55,
-                      fit: BoxFit.cover,
+                  PopupMenuButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
+                    offset: const Offset(0, 60),
+                    iconSize: 55,
+                    icon: ClipRRect(
+                      borderRadius: BorderRadius.circular(50.0),
+                      child: Image.asset(
+                        "images/perfil.png",
+                        height: 55,
+                        width: 55,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: "logout",
+                        child: Row(
+                          children: const [
+                            Icon(Icons.logout, color: Colors.red),
+                            SizedBox(width: 10),
+                            Text("Cerrar sesión"),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onSelected: (value) async {
+                      if (value == "logout") {
+                        await FirebaseAuth.instance.signOut();
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const WelcomePage(),
+                          ),
+                        );
+                      }
+                    },
                   ),
-                  Icon(
-                    Icons.notifications_none_rounded,
-                    size: 32,
-                    color: Color(0xFF415696),
-                  )
                 ],
               ),
 
-              const SizedBox(height: 28),
-
-              /// TITULOS PREMIUM
-              Text("Your Trusted",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF415696),
-                  )),
-              Text("Online Pharmacy",
-                  style: TextStyle(
-                    fontSize: 26,
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500,
-                  )),
-
-              const SizedBox(height: 28),
-
-              /// ---------------------------------------
-              ///        SEARCH BAR
-              /// ---------------------------------------
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                    )
-                  ],
+              const SizedBox(height: 25),
+              const Text(
+                "Your Trusted",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF415696),
                 ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Search medicine...",
-                    hintStyle: TextStyle(
-                      color: Colors.black38,
-                      fontSize: 16,
-                    ),
-                    prefixIcon: Icon(Icons.search_rounded,
-                        size: 28, color: Color(0xFF415696)),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 14),
-                  ),
+              ),
+              const Text(
+                "Online Pharmacy",
+                style: TextStyle(
+                  fontSize: 26,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
 
               const SizedBox(height: 25),
 
-              /// ---------------------------------------
-              ///       CATEGORÍAS PREMIUM
-              /// ---------------------------------------
+              /// 🔹 CATEGORÍAS
               SizedBox(
                 height: 50,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
-                    premiumCategory("All", allmedicine, () {
+                    premiumCategory("Medicine", allmedicine, () {
                       setState(() {
                         allmedicine = true;
-                        suppliment = false;
-                        vitamins = false;
-                        herbal = false;
+                        suppliment = vitamins = herbal = false;
                       });
+                      getProducts("Medicine");
                     }),
                     SizedBox(width: 15),
-                    premiumCategory("Supplements", suppliment, () {
+                    premiumCategory("Supplement", suppliment, () {
                       setState(() {
-                        allmedicine = false;
                         suppliment = true;
-                        vitamins = false;
-                        herbal = false;
+                        allmedicine = vitamins = herbal = false;
                       });
+                      getProducts("Supplement");
                     }),
                     SizedBox(width: 15),
                     premiumCategory("Vitamins", vitamins, () {
                       setState(() {
-                        allmedicine = false;
-                        suppliment = false;
                         vitamins = true;
-                        herbal = false;
+                        allmedicine = suppliment = herbal = false;
                       });
+                      getProducts("Vitamins");
                     }),
                     SizedBox(width: 15),
                     premiumCategory("Herbal", herbal, () {
                       setState(() {
-                        allmedicine = false;
-                        suppliment = false;
-                        vitamins = false;
                         herbal = true;
+                        allmedicine = suppliment = vitamins = false;
                       });
+                      getProducts("Herbal");
                     }),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 20),
 
-              /// ---------------------------------------
-              ///        LISTA DE MEDICINAS (CARDS)
-              /// ---------------------------------------
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      buildMedicineCard(context),
-                      const SizedBox(height: 25),
-                      buildMedicineCard(context),
-                    ],
-                  ),
-                ),
-              ),
+              Expanded(child: allProducts()),
             ],
           ),
         ),
@@ -164,9 +199,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /// -------------------------------------------------
-  ///       CATEGORÍA PREMIUM 
-  /// -------------------------------------------------
   Widget premiumCategory(String title, bool active, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -176,16 +208,7 @@ class _HomeState extends State<Home> {
         decoration: BoxDecoration(
           color: active ? Color(0xFF415696) : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Color(0xFF415696),
-            width: 1.4,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: active ? 10 : 5,
-            )
-          ],
+          border: Border.all(color: Color(0xFF415696), width: 1.4),
         ),
         child: Text(
           title,
@@ -199,19 +222,40 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /// -------------------------------------------------
-  ///         TARJETA DE MEDICINA
-  /// -------------------------------------------------
-  Widget buildMedicineCard(BuildContext context) {
+  /// 🔹 TARJETA DE PRODUCTO CON IMAGEN SEGÚN CATEGORÍA
+  Widget buildMedicineCard(
+    BuildContext context,
+    String name,
+    String description,
+    String company,
+    String price,
+    String category,
+  ) {
+    // Imagen según categoría
+    String imagePath = "images/medicine.png";
+
+    if (category == "Supplement") imagePath = "images/supplements.png";
+    if (category == "Vitamins") imagePath = "images/vitamins.png";
+    if (category == "Herbal") imagePath = "images/herbal.png";
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const DetailPage()),
+          MaterialPageRoute(
+            builder: (context) => DetailPage(
+              name: name,
+              description: description,
+              company: company,
+              price: price,
+              image: imagePath, // imagen dinámica
+            ),
+          ),
         );
       },
       child: Container(
-        height: 270,
+        margin: const EdgeInsets.only(bottom: 20),
+        height: 260,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(28),
@@ -220,24 +264,18 @@ class _HomeState extends State<Home> {
               color: Colors.black12,
               blurRadius: 12,
               offset: Offset(0, 6),
-            )
+            ),
           ],
         ),
         child: Row(
           children: [
-            /// Imagen del medicamento
             Expanded(
               flex: 4,
               child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Image.asset(
-                  "images/medicine.png",
-                  fit: BoxFit.contain,
-                ),
+                padding: const EdgeInsets.all(15),
+                child: Image.asset(imagePath, fit: BoxFit.contain),
               ),
             ),
-
-            /// Información
             Expanded(
               flex: 5,
               child: Padding(
@@ -247,7 +285,7 @@ class _HomeState extends State<Home> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Unique Medicine",
+                      name,
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -256,25 +294,30 @@ class _HomeState extends State<Home> {
                     ),
                     SizedBox(height: 6),
                     Text(
-                      "Oxmas – Premium Healing Formula",
+                      description,
                       style: TextStyle(
                         color: Colors.black54,
                         fontSize: 14,
+                        height: 1.3,
                       ),
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      company,
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                     Spacer(),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      "\$100.00",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF415696),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        "\$$price",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF415696),
+                        ),
                       ),
                     ),
-                  )
-
                   ],
                 ),
               ),

@@ -106,10 +106,6 @@ class _SignupPageState extends State<SignupPage> {
       ),
     );
   }
-
-  //===========================================================
-  //                          UI
-  //===========================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(

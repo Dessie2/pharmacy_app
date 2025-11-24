@@ -1,8 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:pharmacy_app/widgets/support_widget.dart';
+import 'package:pharmacy_app/pages/bottom_nav.dart';
+
+/// Clase global para almacenar las órdenes
+class OrderData {
+  static List<Map<String, dynamic>> orders = [];
+}
 
 class DetailPage extends StatefulWidget {
-  const DetailPage({super.key});
+  final String name;
+  final String description;
+  final String company;
+  final String price;
+  final String image;
+
+  const DetailPage({
+    super.key,
+    required this.name,
+    required this.description,
+    required this.company,
+    required this.price,
+    this.image = "images/medicine.png",
+  });
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -13,19 +31,20 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    double unitPrice = double.tryParse(widget.price) ?? 0.0;
+    double totalPrice = unitPrice * quantity;
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 185, 183, 232),
-
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-
+            padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
-                /// BOTÓN REGRESAR PREMIUM
+                
+                /// BOTÓN REGRESAR
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
@@ -48,17 +67,20 @@ class _DetailPageState extends State<DetailPage> {
                   ),
                 ),
 
-                const SizedBox(height: 5),
-                Center(
-                    child: Image.asset(
-                      "images/medicine.png",
-                      height: MediaQuery.of(context).size.height * 0.40,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
 
-                /// CONTENEDOR DETALLES
+                /// IMAGEN
+                Center(
+                  child: Image.asset(
+                    widget.image, // <-- Imagen dinámica por categoría
+                    height: MediaQuery.of(context).size.height * 0.30,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                /// CONTENEDOR PRINCIPAL
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -73,26 +95,30 @@ class _DetailPageState extends State<DetailPage> {
                       ),
                     ],
                   ),
-
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
 
-                      /// TITULO + CONTADOR
+                      /// TÍTULO + CONTADOR
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            "Hilma Tension\nRelief",
-                            style: AppWidget.headlineTextStyle(22).copyWith(
-                              color: Color(0xFF4B53A6),
-                              height: 1.3,
+                          
+                          Expanded(
+                            child: Text(
+                              widget.name,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF4B53A6),
+                                height: 1.3,
+                              ),
                             ),
                           ),
 
+                          /// CONTADOR
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 15, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                             decoration: BoxDecoration(
                               color: const Color.fromARGB(200, 255, 255, 255),
                               borderRadius: BorderRadius.circular(30),
@@ -106,23 +132,21 @@ class _DetailPageState extends State<DetailPage> {
                                       setState(() => quantity--);
                                     }
                                   },
-                                  child: const Icon(Icons.remove,
-                                      color: Color(0xFF4B53A6)),
+                                  child: const Icon(Icons.remove, color: Color(0xFF4B53A6)),
                                 ),
-
                                 const SizedBox(width: 12),
-
-                                Text(quantity.toString(),
-                                    style: AppWidget.headlineTextStyle(18)),
-
+                                Text(
+                                  quantity.toString(),
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 const SizedBox(width: 12),
-
                                 GestureDetector(
-                                  onTap: () {
-                                    setState(() => quantity++);
-                                  },
-                                  child: const Icon(Icons.add,
-                                      color: Color(0xFF4B53A6)),
+                                  onTap: () => setState(() => quantity++),
+                                  child: const Icon(Icons.add, color: Color(0xFF4B53A6)),
                                 ),
                               ],
                             ),
@@ -130,81 +154,134 @@ class _DetailPageState extends State<DetailPage> {
                         ],
                       ),
 
-                      const SizedBox(height: 25),
+                      const SizedBox(height: 20),
 
-                      /// DESCRIPCIÓN
-                      Text("Description",
-                          style: AppWidget.headlineTextStyle(18).copyWith(
-                            color: Color(0xFF4B53A6),
-                          )),
+                      /// COMPAÑÍA
+                      Text(
+                        widget.company,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      /// DESCRIPTION
+                      const Text(
+                        "Description",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF4B53A6),
+                        ),
+                      ),
 
                       const SizedBox(height: 10),
 
                       Text(
-                        "Natural plant-based formula designed to relieve "
-                        "head tension and discomfort quickly and safely.",
-                        style: AppWidget.lightTextStyle(16),
+                        widget.description,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                          height: 1.4,
+                        ),
                       ),
 
                       const SizedBox(height: 30),
 
-                      /// TOTAL + BOTÓN
+                      /// TOTAL + BOTÓN ORDENAR
                       Container(
                         padding: const EdgeInsets.all(15),
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(180, 255, 255, 255),
                           borderRadius: BorderRadius.circular(15),
                         ),
-
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-
+                            
+                            /// TOTAL
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Total Price:",
-                                    style: AppWidget.lightTextStyle(18)),
+                                const Text(
+                                  "Total Price:",
+                                  style: TextStyle(fontSize: 18, color: Colors.black54),
+                                ),
                                 const SizedBox(height: 5),
                                 Text(
-                                  "\$ ${(24.99 * quantity).toStringAsFixed(2)}",
-                                  style: AppWidget.headlineTextStyle(22)
-                                      .copyWith(color: Color(0xFF4B53A6)),
+                                  "\$${totalPrice.toStringAsFixed(2)}",
+                                  style: const TextStyle(
+                                    fontSize: 26,
+                                    color: Color(0xFF4B53A6),
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),
 
-                            Container(
-                              height: 50,
-                              width: 180,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF4B53A6),
-                                    Color(0xFF8C92E9),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(30),
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 12,
-                                    offset: Offset(0, 4),
-                                    color: Colors.black.withOpacity(0.18),
+                            /// BOTÓN ORDENAR
+                            GestureDetector(
+                              onTap: () {
+                                double total =
+                                    (double.tryParse(widget.price) ?? 0) * quantity;
+
+                                // Guardar orden
+                                OrderData.orders.add({
+                                  "name": widget.name,
+                                  "company": widget.company,
+                                  "description": widget.description,
+                                  "quantity": quantity,
+                                  "price": widget.price,
+                                  "totalPrice": total,
+                                  "image": widget.image,
+                                });
+
+                                // Mandar a Order dentro de BottomNav TAB 1
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const BottomNav(initialTab: 1),
                                   ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "Order Now",
-                                  style: AppWidget.whiteTextStyle(20),
+                                );
+                              },
+                              child: Container(
+                                height: 50,
+                                width: 180,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF4B53A6),
+                                      Color(0xFF8C92E9),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(30),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      blurRadius: 12,
+                                      offset: Offset(0, 4),
+                                      color: Colors.black26,
+                                    ),
+                                  ],
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    "Order Now",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
+
                     ],
                   ),
                 ),

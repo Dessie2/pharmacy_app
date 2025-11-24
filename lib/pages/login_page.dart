@@ -10,15 +10,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // Controladores
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   bool loading = false;
 
-  // =========================
-  //       LOGIN FIREBASE
-  // =========================
   loginUser() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
@@ -34,13 +30,13 @@ class _LoginPageState extends State<LoginPage> {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      // Guardar datos del usuario localmente
       await SharedpreferencesHelper().saveUserEmail(email);
 
       _showMessage("Welcome back!", success: true);
 
-      // Ir al home
-      Navigator.pushReplacementNamed(context, '/home');
+      //Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/bottom-nav');
+
     } on FirebaseAuthException catch (e) {
       if (e.code == "user-not-found") {
         _showMessage("No user found with that email");
@@ -70,7 +66,6 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
 
-      // LOADING
       body: loading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF415696)))
           : Center(
@@ -118,7 +113,6 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 10),
 
-                    // INPUT EMAIL
                     _inputField(
                       label: "Email",
                       controller: emailController,
@@ -127,7 +121,6 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 18),
 
-                    // INPUT PASSWORD
                     _inputField(
                       label: "Password",
                       controller: passwordController,
@@ -174,6 +167,36 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
+
+                    SizedBox(height: 180),
+
+                    // --------------------------
+                    // BOTÓN ADMIN 
+                    // --------------------------
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 83, 104, 161),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 15, horizontal: 40),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        elevation: 6,
+                      ),
+
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/admin/login'),
+                      child: const Text(
+                        "Admin Login",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 15),
                   ],
                 ),
               ),
@@ -181,9 +204,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // =========================
-  //  INPUT FIELD PREMIUM
-  // =========================
+  //  INPUT FIELD
   Widget _inputField({
     required String label,
     required IconData icon,

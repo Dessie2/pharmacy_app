@@ -10,6 +10,9 @@ class WelcomePage extends StatefulWidget {
 class _WelcomePageState extends State<WelcomePage> {
   bool isLoginSelected = true;
 
+  static const Color _primaryColor = Color(0xFF4156A6);
+  static const Color _secondaryColor = Color(0xFF26314F);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,7 +22,7 @@ class _WelcomePageState extends State<WelcomePage> {
           children: [
             const SizedBox(height: 40),
 
-            
+            // LOGO Y NOMBRE
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Row(
@@ -32,7 +35,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ),
                     child: const Icon(
                       Icons.local_pharmacy_rounded,
-                      color: Color(0xFF4156A6),
+                      color: _primaryColor,
                       size: 28,
                     ),
                   ),
@@ -43,7 +46,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                       fontFamily: "Raleway",
-                      color: Color(0xFF26314F),
+                      color: _secondaryColor,
                     ),
                   ),
                 ],
@@ -63,7 +66,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
             const SizedBox(height: 35),
 
-            // ------------------- TÍTULO ------------------- //
+            // ------------------- TÍTULO Y DESCRIPCIÓN ------------------- //
             const Text(
               "Your Health,\nOur Priority",
               textAlign: TextAlign.center,
@@ -93,6 +96,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
             const SizedBox(height: 80),
 
+            // ------------------- BOTONES DE USUARIO (LOGIN / REGISTER) ------------------- //
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -145,7 +149,7 @@ class _WelcomePageState extends State<WelcomePage> {
   Widget _primaryButton({required String label, required VoidCallback onTap}) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF4156A6),
+        backgroundColor: _primaryColor,
         padding: const EdgeInsets.symmetric(horizontal: 42, vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
@@ -174,7 +178,7 @@ class _WelcomePageState extends State<WelcomePage> {
         style: const TextStyle(
           fontSize: 18,
           fontFamily: 'Raleway',
-          color: Color(0xFF26314F),
+          color: _secondaryColor,
           fontWeight: FontWeight.w600,
         ),
       ),
