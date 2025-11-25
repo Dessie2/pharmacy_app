@@ -105,7 +105,6 @@ class _OrderState extends State<Order> {
     );
   }
 
-  /// 🔥 CARD DE ÓRDENES CON DELETE FIRESTORE
   Widget buildOrderCard({
     required String id,
     required String name,

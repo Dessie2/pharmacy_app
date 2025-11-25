@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Importar FirebaseAuth
+import 'package:pharmacy_app/services/shared_pref.dart'; // Importar Shared preferences
+import 'AdminLoginPage.dart'; // Importar la página de login para navegar de vuelta
 
 class AddProductPage extends StatefulWidget {
   const AddProductPage({super.key});
@@ -18,7 +21,28 @@ class _AddProductPageState extends State<AddProductPage> {
   bool loading = false;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Instancia de FirebaseAuth
 
+  // ------------ FUNCIÓN CERRAR SESIÓN ---------------
+  Future<void> logoutUser() async {
+    try {
+      await _auth.signOut(); // Cierra la sesión de Firebase
+      await SharedpreferencesHelper().saveUserEmail(''); // Limpia el email guardado
+      
+      if (!mounted) return;
+      // Navega de regreso a la página de inicio de sesión del administrador
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const AdminLoginPage()),
+        (Route<dynamic> route) => false, // Elimina todas las rutas anteriores
+      );
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage("Logout error: $e");
+    }
+  }
+
+  // ------------ FUNCIÓN AÑADIR PRODUCTO ---------------
   Future<void> addProduct() async {
     if (nameController.text.isEmpty ||
         priceController.text.isEmpty ||
@@ -40,11 +64,11 @@ class _AddProductPageState extends State<AddProductPage> {
     try {
       await _firestore.collection("products").add({
         "name": nameController.text.trim(),
-        "price": price,                            // <--- ahora double
+        "price": price,
         "category": selectedCategory,
         "company": companyController.text.trim(),
         "description": descriptionController.text.trim(),
-        "created_at": Timestamp.now(),             // <--- correcto para Firestore
+        "created_at": Timestamp.now(),
       });
 
       _showMessage("Product Added!", success: true);
@@ -59,10 +83,13 @@ class _AddProductPageState extends State<AddProductPage> {
       _showMessage("Error: $e");
     }
 
-    setState(() => loading = false);
+    if (mounted) {
+      setState(() => loading = false);
+    }
   }
 
   void _showMessage(String text, {bool success = false}) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: success ? Colors.green : Colors.red,
@@ -77,11 +104,26 @@ class _AddProductPageState extends State<AddProductPage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
+      appBar: AppBar(
+        title: const Text(
+          "Admin Panel",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: primary,
+        actions: [
+          // ---------------- BOTÓN DE CERRAR SESIÓN ----------------
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: logoutUser, // Llama a la nueva función de cerrar sesión
+            tooltip: 'Cerrar Sesión',
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(26),
         child: Column(
           children: [
-            const SizedBox(height: 40),
+            const SizedBox(height: 10), // Espacio ajustado ya que ahora hay AppBar
             const Text(
               "Add Product",
               style: TextStyle(
@@ -121,6 +163,8 @@ class _AddProductPageState extends State<AddProductPage> {
       ),
     );
   }
+
+  // ... (El resto de tus widgets auxiliares se mantienen sin cambios)
 
   Widget _input(String label, TextEditingController controller,
       {TextInputType keyboard = TextInputType.text}) {

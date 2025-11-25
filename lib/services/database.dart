@@ -15,6 +15,13 @@ class DatabaseMethods {
   Future<DocumentSnapshot<Map<String, dynamic>>> getUserInfo(String uid) async {
     return _firestore.collection("users").doc(uid).get();
   }
+  
+  /// Actualiza el saldo de la billetera de un usuario específico
+  Future<void> updateWalletBalance(String uid, int newBalance) async {
+    return _firestore.collection("users").doc(uid).update({
+      "walletBalance": newBalance,
+    });
+  }
 
   // ============================
   // PRODUCTS
@@ -45,5 +52,19 @@ class DatabaseMethods {
 
   Future<void> deleteOrder(String id) {
     return _firestore.collection("orders").doc(id).delete();
+  }
+  
+  /// Limpia todas las órdenes en Firestore usando un WriteBatch
+  Future<void> clearAllOrders() async {
+    CollectionReference ordersCollection = _firestore.collection('orders');
+
+    QuerySnapshot snapshot = await ordersCollection.get();
+    WriteBatch batch = _firestore.batch();
+
+    for (var doc in snapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    return batch.commit();
   }
 }
