@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pharmacy_app/pages/bottom_nav.dart';
-
-/// Clase global para almacenar las órdenes
-class OrderData {
-  static List<Map<String, dynamic>> orders = [];
-}
+import 'package:pharmacy_app/services/database.dart';
 
 class DetailPage extends StatefulWidget {
   final String name;
@@ -19,7 +15,7 @@ class DetailPage extends StatefulWidget {
     required this.description,
     required this.company,
     required this.price,
-    this.image = "images/medicine.png",
+    required this.image,
   });
 
   @override
@@ -43,8 +39,8 @@ class _DetailPageState extends State<DetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
-                /// BOTÓN REGRESAR
+
+                // 🔙 BOTÓN REGRESAR
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
@@ -69,10 +65,10 @@ class _DetailPageState extends State<DetailPage> {
 
                 const SizedBox(height: 10),
 
-                /// IMAGEN
+                // 🖼️ IMAGEN
                 Center(
                   child: Image.asset(
-                    widget.image, // <-- Imagen dinámica por categoría
+                    widget.image,
                     height: MediaQuery.of(context).size.height * 0.30,
                     fit: BoxFit.contain,
                   ),
@@ -80,7 +76,7 @@ class _DetailPageState extends State<DetailPage> {
 
                 const SizedBox(height: 20),
 
-                /// CONTENEDOR PRINCIPAL
+                // 🟦 CONTENEDOR PRINCIPAL
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -99,11 +95,10 @@ class _DetailPageState extends State<DetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
 
-                      /// TÍTULO + CONTADOR
+                      // 📌 TÍTULO + CONTADOR
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          
                           Expanded(
                             child: Text(
                               widget.name,
@@ -116,7 +111,7 @@ class _DetailPageState extends State<DetailPage> {
                             ),
                           ),
 
-                          /// CONTADOR
+                          // 🔢 CONTADOR
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                             decoration: BoxDecoration(
@@ -156,7 +151,7 @@ class _DetailPageState extends State<DetailPage> {
 
                       const SizedBox(height: 20),
 
-                      /// COMPAÑÍA
+                      // 🏭 COMPANY
                       Text(
                         widget.company,
                         style: const TextStyle(
@@ -168,7 +163,7 @@ class _DetailPageState extends State<DetailPage> {
 
                       const SizedBox(height: 20),
 
-                      /// DESCRIPTION
+                      // 🧾 DESCRIPTION
                       const Text(
                         "Description",
                         style: TextStyle(
@@ -191,7 +186,7 @@ class _DetailPageState extends State<DetailPage> {
 
                       const SizedBox(height: 30),
 
-                      /// TOTAL + BOTÓN ORDENAR
+                      // 💰 TOTAL + BOTÓN ORDENAR
                       Container(
                         padding: const EdgeInsets.all(15),
                         decoration: BoxDecoration(
@@ -201,8 +196,8 @@ class _DetailPageState extends State<DetailPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            
-                            /// TOTAL
+
+                            // 💵 TOTAL
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -222,14 +217,13 @@ class _DetailPageState extends State<DetailPage> {
                               ],
                             ),
 
-                            /// BOTÓN ORDENAR
+                            // 🛒 BOTÓN ORDENAR (GUARDA EN FIRESTORE)
                             GestureDetector(
-                              onTap: () {
+                              onTap: () async {
                                 double total =
                                     (double.tryParse(widget.price) ?? 0) * quantity;
 
-                                // Guardar orden
-                                OrderData.orders.add({
+                                await DatabaseMethods().addOrder({
                                   "name": widget.name,
                                   "company": widget.company,
                                   "description": widget.description,
@@ -237,9 +231,9 @@ class _DetailPageState extends State<DetailPage> {
                                   "price": widget.price,
                                   "totalPrice": total,
                                   "image": widget.image,
+                                  "timestamp": DateTime.now(),
                                 });
 
-                                // Mandar a Order dentro de BottomNav TAB 1
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

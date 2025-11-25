@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'detail_page.dart';
 import 'package:pharmacy_app/pages/bottom_nav.dart';
+import 'package:pharmacy_app/services/database.dart';
 
 class Order extends StatefulWidget {
   const Order({super.key});
@@ -20,8 +20,8 @@ class _OrderState extends State<Order> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
-              /// BOTÓN REGRESAR (preserva BottomNav)
+
+              /// BOTÓN REGRESAR
               Row(
                 children: [
                   IconButton(
@@ -53,10 +53,19 @@ class _OrderState extends State<Order> {
 
               const SizedBox(height: 20),
 
-              /// LISTA DE ÓRDENES
+              /// 🔥 LISTA DE ÓRDENES DESDE FIRESTORE
               Expanded(
-                child: OrderData.orders.isEmpty
-                    ? const Center(
+                child: StreamBuilder(
+                  stream: DatabaseMethods().getOrders(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final orders = snapshot.data!.docs;
+
+                    if (orders.isEmpty) {
+                      return const Center(
                         child: Text(
                           "No orders yet",
                           style: TextStyle(
@@ -65,24 +74,29 @@ class _OrderState extends State<Order> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                      )
-                    : ListView.builder(
-                        padding: EdgeInsets.zero,
-                        itemCount: OrderData.orders.length,
-                        itemBuilder: (context, index) {
-                          final order = OrderData.orders[index];
+                      );
+                    }
 
-                          return buildOrderCard(
-                            index: index,
-                            name: order["name"],
-                            quantity: order["quantity"].toString(),
-                            company: order["company"],
-                            totalPrice:
-                                order["totalPrice"].toStringAsFixed(2),
-                            image: order["image"],
-                          );
-                        },
-                      ),
+                    return ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: orders.length,
+                      itemBuilder: (context, index) {
+                        final data =
+                            orders[index].data() as Map<String, dynamic>;
+                        final id = orders[index].id;
+
+                        return buildOrderCard(
+                          id: id,
+                          name: data["name"],
+                          quantity: data["quantity"].toString(),
+                          company: data["company"],
+                          totalPrice: data["totalPrice"].toString(),
+                          image: data["image"],
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -91,9 +105,9 @@ class _OrderState extends State<Order> {
     );
   }
 
-  /// CARD DE ÓRDENES CON BOTÓN ELIMINAR
+  /// 🔥 CARD DE ÓRDENES CON DELETE FIRESTORE
   Widget buildOrderCard({
-    required int index,
+    required String id,
     required String name,
     required String quantity,
     required String company,
@@ -131,7 +145,7 @@ class _OrderState extends State<Order> {
 
           const SizedBox(width: 15),
 
-          /// INFORMACIÓN DE LA ORDEN
+          /// INFO DE LA ORDEN
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +158,9 @@ class _OrderState extends State<Order> {
                     color: Color(0xFF415696),
                   ),
                 ),
+
                 const SizedBox(height: 6),
+
                 Text(
                   "Quantity : $quantity",
                   style: const TextStyle(
@@ -152,6 +168,7 @@ class _OrderState extends State<Order> {
                     color: Colors.black,
                   ),
                 ),
+
                 Text(
                   company,
                   style: const TextStyle(
@@ -160,7 +177,9 @@ class _OrderState extends State<Order> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+
                 const SizedBox(height: 6),
+
                 Text(
                   "Total Price : \$$totalPrice",
                   style: const TextStyle(
@@ -175,12 +194,10 @@ class _OrderState extends State<Order> {
 
           const SizedBox(width: 10),
 
-          /// BOTÓN ELIMINAR
+          /// 🔥 BOTÓN ELIMINAR DESDE FIRESTORE
           IconButton(
             onPressed: () {
-              setState(() {
-                OrderData.orders.removeAt(index);
-              });
+              DatabaseMethods().deleteOrder(id);
             },
             icon: const Icon(
               Icons.delete,

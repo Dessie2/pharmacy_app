@@ -1,8 +1,8 @@
 import 'package:pharmacy_app/services/shared_pref.dart';
-import 'package:random_string/random_string.dart';
 import 'package:pharmacy_app/services/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pharmacy_app/pages/bottom_nav.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -21,7 +21,7 @@ class _SignupPageState extends State<SignupPage> {
   bool loading = false;
 
   //===========================================================
-  //               REGISTRO COMPLETO CON FIREBASE
+  //                   REGISTRO FIREBASE
   //===========================================================
   Future<void> registration() async {
     String name = nameController.text.trim();
@@ -29,9 +29,7 @@ class _SignupPageState extends State<SignupPage> {
     String password = passwordController.text.trim();
     String confirmPassword = confirmPassController.text.trim();
 
-    // ----------------------------------------------------------
-    // Validaciones básicas
-    // ----------------------------------------------------------
+    // Validaciones
     if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       showSnack("All fields are required", Colors.red);
       return;
@@ -50,37 +48,46 @@ class _SignupPageState extends State<SignupPage> {
     setState(() => loading = true);
 
     try {
-      // Crear usuario en Auth
+      // Crear usuario Auth
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // ID único
-      String id = randomAlphaNumeric(12);
+      User? user = userCredential.user;
 
-      // Datos para Firestore
+      if (user == null) {
+        showSnack("Unexpected error occurred", Colors.red);
+        setState(() => loading = false);
+        return;
+      }
+
+      String uid = user.uid;
+
+      // Datos del usuario
       Map<String, dynamic> userInfoMap = {
-        "id": id,
+        "id": uid,
         "name": name,
         "email": email,
         "createdAt": DateTime.now().millisecondsSinceEpoch,
       };
 
       // Guardar en SharedPreferences
-      await SharedpreferencesHelper().saveUserId(id);
+      await SharedpreferencesHelper().saveUserId(uid);
       await SharedpreferencesHelper().saveUserEmail(email);
       await SharedpreferencesHelper().saveUserName(name);
 
       // Guardar en Firestore
-      await DatabaseMethods().addUserInfo(userInfoMap, id);
-     
+      await DatabaseMethods().addUserInfo(userInfoMap, uid);
 
       showSnack("Registered Successfully!", Colors.green);
 
-      // Navegar al Home
-      Navigator.pushNamed(context, '/home');
+      // 🔥 NAVEGAR AL BOTTOM NAV
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const BottomNav()),
+      );
 
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -96,7 +103,7 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   //===========================================================
-  //                  MENSAJES (Snackbars)
+  //                   SNACKBARS
   //===========================================================
   void showSnack(String text, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -106,6 +113,7 @@ class _SignupPageState extends State<SignupPage> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -223,7 +231,7 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   //===========================================================
-  //                  INPUT FIELDS PREMIUM
+  //                    INPUT FIELDS
   //===========================================================
   static Widget _inputField({
     required String label,

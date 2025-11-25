@@ -15,7 +15,10 @@ class _LoginPageState extends State<LoginPage> {
 
   bool loading = false;
 
-  loginUser() async {
+  // =============================================================
+  //                        LOGIN USER
+  // =============================================================
+  Future<void> loginUser() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
@@ -27,14 +30,25 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => loading = true);
 
     try {
+      // Login en Firebase
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
+      User? user = userCredential.user;
+
+      if (user == null) {
+        _showMessage("Unexpected login error");
+        setState(() => loading = false);
+        return;
+      }
+
+      // 🔥 Guardar datos en SharedPreferences
       await SharedpreferencesHelper().saveUserEmail(email);
+      await SharedpreferencesHelper().saveUserId(user.uid);
 
       _showMessage("Welcome back!", success: true);
 
-      //Navigator.pushReplacementNamed(context, '/home');
+      // Navegar al home con bottom navigation
       Navigator.pushReplacementNamed(context, '/bottom-nav');
 
     } on FirebaseAuthException catch (e) {
@@ -52,6 +66,9 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => loading = false);
   }
 
+  // =============================================================
+  //                  MENSAJES (Snackbars)
+  // =============================================================
   void _showMessage(String text, {bool success = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -61,13 +78,18 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // =============================================================
+  //                       UI
+  // =============================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
 
       body: loading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF415696)))
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF415696)),
+            )
           : Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(28),
@@ -168,7 +190,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
 
-                    SizedBox(height: 180),
+                    const SizedBox(height: 180),
 
                     // --------------------------
                     // BOTÓN ADMIN 
@@ -183,7 +205,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         elevation: 6,
                       ),
-
                       onPressed: () =>
                           Navigator.pushNamed(context, '/admin/login'),
                       child: const Text(
@@ -204,7 +225,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  //  INPUT FIELD
+  // =============================================================
+  //                INPUT FIELD (DISEÑO PREMIUM)
+  // =============================================================
   Widget _inputField({
     required String label,
     required IconData icon,
